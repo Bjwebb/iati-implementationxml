@@ -1,6 +1,7 @@
-header = ['','', '', 'status', 'publication-date', 'exclusion', '', 'provider-definition', 'notes']
-#header = header[1:]
+header = ['','','', 'status', 'publication-date', 'exclusion', '', 'provider-definition', 'notes']
+
 organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'documents'] 
+
 activity_rows = [
     '',
     '',

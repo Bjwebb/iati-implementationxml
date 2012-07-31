@@ -7,6 +7,10 @@ import structure
 
 datemode = None
 def get_date(value):
+    """ Helper function to return the date for a given spreadsheet
+        cell value.
+    
+    """
     global datemode
     return datetime.datetime(*xlrd.xldate_as_tuple(value, datemode))
 
@@ -43,6 +47,14 @@ def parse_data(root, sheet, rows):
     return root
 
 def parse_information(root, sheet, rows):
+    """ Parse the Publisher Information sheet
+
+        root -- an xml element to append to
+        sheet -- the xlrd sheet element to parse
+        rows -- a list of tuples containing structural
+                information about each cell in the sheet 
+
+    """
     for rowx,row in enumerate(rows):
         if row:
             el = etree.SubElement(root, row[1])
@@ -62,8 +74,9 @@ def parse_information(root, sheet, rows):
     
 
 def silent_value(sheet, **args):
-    """ Helper function to convert cell values to strings
+    """ Helper function to fetch cell values and convert them to strings,
         whilst ignoring possible exceptions.
+
     """
     try:
         value = sheet.cell_value(**args)
@@ -78,10 +91,12 @@ def silent_value(sheet, **args):
         return ''
 
 def full_xml(spreadsheet):
+    """ Print the full parsed xml for the given spreadsheet filename"""
     global datemode
+    global E
+    E = ElementMaker()
     book = xlrd.open_workbook(spreadsheet)
     datemode = book.datemode
-    E = ElementMaker()
     sheet = book.sheet_by_index(0)
     root = E.implementation(
         E.metadata(
@@ -111,13 +126,21 @@ def full_xml(spreadsheet):
     print '<?xml version="1.0" encoding="utf-8"?>'
     print(etree.tostring(root, pretty_print=True))
 
-def sheetschema(root, sheet):
-    rows = vars(structure)[sheet+'_rows'] 
+def sheetschema(root, sheetname):
+    """ Produce the schema elements for the named sheet.
+
+        root -- an xml element to append to
+        sheetname -- the short name of a sheet, as used in the structure
+                     data and as the xml tag name.
+                     Possible values are 'activity' and 'organisation'
+
+    """
+    global E
+    rows = vars(structure)[sheetname+'_rows'] 
     tuple_rows_done = []
-    E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema")
     choice = E.choice(maxOccurs="unbounded")
     root.append(
-        E.element(E.complexType(choice), name=sheet)
+        E.element(E.complexType(choice), name=sheetname)
     )
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
@@ -145,8 +168,13 @@ def sheetschema(root, sheet):
             choice.append( E.element(ref=rowname) )
 
 def publishingschema(root):
+    """ Produce the necessary schema elements for the publishing sheet. 
+
+        root -- an xml element to append to
+
+    """
+    global E
     rows = structure.publishing_rows
-    E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema")
     choice = E.choice(maxOccurs="unbounded")
     root.append(
         E.element(E.complexType(choice), name="publishing")
@@ -169,60 +197,68 @@ def publishingschema(root):
                 el = E.element(name=row[1], type="xs:string")
             choice.append(el)
 
-import sys
-if len(sys.argv) > 1:
-    if sys.argv[1] == "--schema":
-        E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema")
-        headerchoice = E.all()
-        root = E.schema(
-            E.complexType( 
-                headerchoice,
-                name = "informationArea"
+def full_schema():
+    """ Print the full schema, based on the definitions in structure.py"""
+    global E
+    E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema",
+                     nsmap={'xs':"http://www.w3.org/2001/XMLSchema"})
+    headerchoice = E.all()
+    root = E.schema(
+        E.complexType( 
+            headerchoice,
+            name = "informationArea"
+        ),
+        E.element(
+            E.complexType(
+                E.all(
+                    E.element(ref="metadata"),
+                    E.element(ref="publishing"),
+                    E.element(ref="organisation"),
+                    E.element(ref="activity"),
+                )
             ),
-            E.element(
-                E.complexType(
-                    E.all(
-                        E.element(
-                            E.complexType(
-                                E.all(
-                                    E.element(
-                                        E.complexType(
-                                            E.simpleContent(
-                                                E.extension(
-                                                    E.attribute(name="code", type="xs:string"),
-                                                    base="xs:string"
-                                                )
-                                            )
-                                        ),
-                                        name="publisher"
-                                    ),
-                                    E.element(name="version", type="xs:string"),
-                                    E.element(name="date", type="xs:string")
-                                ),
-                            ),
-                            name="metadata"
-                        ),
-                        E.element(ref="publishing"),
-                        E.element(ref="organisation"),
-                        E.element(ref="activity"),
-                    )
+            name="implementation"
+        ),
+        E.element(
+            E.complexType(
+                E.all(
+                    E.element(ref="publisher"),
+                    E.element(name="version", type="xs:string"),
+                    E.element(name="date", type="xs:string")
                 ),
-                name="implementation"
-            )
-        )
-        for heading in structure.header:
-            if heading == '': continue
-            ## Use of xs: here, FIXME
-            headerchoice.append( E.element(name=heading, type="xs:string", minOccurs="0") )
-        sheetschema(root, 'organisation')
-        sheetschema(root, 'activity')
-        publishingschema(root)
-        print '<?xml version="1.0" encoding="utf-8"?>'
-        print(etree.tostring(root, pretty_print=True))
+            ),
+            name="metadata"
+        ),
+        E.element(
+            E.complexType(
+                E.simpleContent(
+                    E.extension(
+                        E.attribute(name="code", type="xs:string"),
+                        base="xs:string"
+                    )
+                )
+            ),
+            name="publisher"
+        ),
+    )
+    for heading in structure.header:
+        if heading == '': continue
+        headerchoice.append( E.element(name=heading, type="xs:string", minOccurs="0") )
+    sheetschema(root, 'organisation')
+    sheetschema(root, 'activity')
+    publishingschema(root)
+    print '<?xml version="1.0" encoding="utf-8"?>'
+    print(etree.tostring(root, pretty_print=True))
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--schema":
+            full_schema()
+        else:
+            full_xml(sys.argv[1])
     else:
-        full_xml(sys.argv[1])
-else:
-    print """Usage:
-    python toxml.py --schema    -- Generates the XML schema 
-    python toxml.py [filename]  -- Assumes the file is xls and tries
-                                   to generate xml from it"""
+        print """Usage:
+        python toxml.py --schema    -- Generates the XML schema 
+        python toxml.py [filename]  -- Assumes the file is xls and tries
+                                       to generate xml from it"""
