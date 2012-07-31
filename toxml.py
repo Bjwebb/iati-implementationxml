@@ -46,7 +46,7 @@ def parse_information(root, sheet, rows):
         if row:
             el = etree.SubElement(root, row[1])
             row_data = sheet.row(rowx)
-            if row[4] == "narrative":
+            if row[4] == 'narrative':
                 for i in 2,3:
                     if row[i] != '':
                         if row[i] in structure.date_tags and row_data[i].value !='':
@@ -60,9 +60,24 @@ def parse_information(root, sheet, rows):
     return root
     
 
+def silent_value(sheet, **args):
+    try:
+        return sheet.cell_value(**args)
+    except IndexError:
+        return ''
+
 def full_xml():
     E = ElementMaker()
+    sheet = book.sheet_by_index(0)
     root = E.implementation(
+        E.metadata(
+            E.publisher(
+                silent_value(sheet, rowx=2, colx=3),
+                code=silent_value(sheet, rowx=4, colx=3)
+            ),
+            E.version(silent_value(sheet, rowx=7, colx=3)),
+            E.date(silent_value(sheet, rowx=7, colx=6))
+        ),
         parse_information(
             E.publishing(),
             book.sheet_by_index(1),
@@ -153,6 +168,26 @@ if len(sys.argv) > 1:
         E.element(
             E.complexType(
                 E.all(
+                    E.element(
+                        E.complexType(
+                            E.all(
+                                E.element(
+                                    E.complexType(
+                                        E.simpleContent(
+                                            E.extension(
+                                                E.attribute(name="code", type="xs:string"),
+                                                base="xs:string"
+                                            )
+                                        )
+                                    ),
+                                    name="publisher"
+                                ),
+                                E.element(name="version", type="xs:string"),
+                                E.element(name="date", type="xs:string")
+                            ),
+                        ),
+                        name="metadata"
+                    ),
                     E.element(ref="publishing"),
                     E.element(ref="organisation"),
                     E.element(ref="activity"),
