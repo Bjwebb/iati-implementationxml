@@ -7,12 +7,16 @@ import structure
 
 datemode = None
 def get_date(value):
-    """ Helper function to return the date for a given spreadsheet
-        cell value.
+    """ Helper function to return the xml date string for a given
+        spreadsheet cell value.
     
     """
     global datemode
-    return datetime.datetime(*xlrd.xldate_as_tuple(value, datemode))
+    try:
+        date = datetime.datetime(*xlrd.xldate_as_tuple(value, datemode))
+        return unicode(date)
+    except ValueError:
+        return ''
 
 def parse_data(root, sheet, rows):
     """ Parse a 'data' sheet.
@@ -26,25 +30,41 @@ def parse_data(root, sheet, rows):
     for rowx,rowname in enumerate(rows):
         if rowname == '':
             continue
+        # rowname may be a tuple or a string
+        # ('a', 'b', 'c')  ->  <a b="c">
         if isinstance(rowname, tuple):
             rowxml = etree.Element(rowname[0],
                                     {rowname[1]:rowname[2]})
+        # 'string'  ->  <string>
         else:
             rowxml = etree.Element(rowname)
+        
         for colx, heading in enumerate(structure.header):
-            if heading == '': continue
-            try: cell = sheet.cell_value(rowx=rowx, colx=colx)
-            except IndexError: continue
-            #if heading == 'exlusion':
-            #    cell = sheet.cell_value(rowx=rowx, colx=colx)
-            #print rowname, heading, ": ", cell
-            if cell:
-                a = etree.SubElement(rowxml, heading)
-                if heading in structure.date_tags:
-                    cell = get_date(cell)
-                a.text = unicode(cell)
+            if heading == '':
+                continue
+            try:
+                cell = sheet.cell_value(rowx=rowx, colx=colx)
+            except IndexError:
+                continue
+            el = etree.SubElement(rowxml, heading)
+            if heading in structure.date_tags:
+                cell = get_date(cell)
+            else:
+                cell = unicode(cell)
+            if cell != '':
+                el.text = cell
+            if heading == 'exclusion':
+                try:
+                    next_cell = unicode(sheet.cell_value(rowx=rowx, colx=colx+1))
+                    if next_cell == '':
+                        continue
+                    else:
+                        el.attrib['code'] = unicode(next_cell)
+                except IndexError:
+                    continue
         root.append(rowxml)
     return root
+
 
 def parse_information(root, sheet, rows):
     """ Parse the Publisher Information sheet
@@ -63,7 +83,7 @@ def parse_information(root, sheet, rows):
                 for i in 2,3:
                     if row[i] != '':
                         if row[i] in structure.date_tags and row_data[i].value !='':
-                            el.attrib[row[i]] = unicode(get_date(row_data[i].value))
+                            el.attrib[row[i]] = get_date(row_data[i].value)
                         else:
                             el.attrib[row[i]] = unicode(row_data[i].value)
                 el.text = row_data[4].value
@@ -89,6 +109,7 @@ def silent_value(sheet, **args):
             return value
     except IndexError:
         return ''
+
 
 def full_xml(spreadsheet):
     """ Print the full parsed xml for the given spreadsheet filename"""
@@ -125,6 +146,7 @@ def full_xml(spreadsheet):
     )
     print '<?xml version="1.0" encoding="utf-8"?>'
     print(etree.tostring(root, pretty_print=True))
+
 
 def sheetschema(root, sheetname):
     """ Produce the schema elements for the named sheet.
@@ -167,6 +189,7 @@ def sheetschema(root, sheetname):
             ) )
             choice.append( E.element(ref=rowname) )
 
+
 def publishingschema(root):
     """ Produce the necessary schema elements for the publishing sheet. 
 
@@ -197,6 +220,7 @@ def publishingschema(root):
                 el = E.element(name=row[1], type="xs:string")
             choice.append(el)
 
+
 def full_schema():
     """ Print the full schema, based on the definitions in structure.py"""
     global E
@@ -222,28 +246,30 @@ def full_schema():
         E.element(
             E.complexType(
                 E.all(
-                    E.element(ref="publisher"),
+                    E.element(name="publisher", type="codeType"),
                     E.element(name="version", type="xs:string"),
                     E.element(name="date", type="xs:string")
                 ),
             ),
             name="metadata"
         ),
-        E.element(
-            E.complexType(
-                E.simpleContent(
-                    E.extension(
-                        E.attribute(name="code", type="xs:string"),
-                        base="xs:string"
-                    )
+        E.complexType(
+            E.simpleContent(
+                E.extension(
+                    E.attribute(name="code", type="xs:string"),
+                    base="xs:string"
                 )
             ),
-            name="publisher"
+            name="codeType"
         ),
     )
     for heading in structure.header:
         if heading == '': continue
-        headerchoice.append( E.element(name=heading, type="xs:string", minOccurs="0") )
+        if heading == 'exclusion':
+            t = 'codeType'
+        else:
+            t = 'xs:string'
+        headerchoice.append( E.element(name=heading, type=t) )
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
     publishingschema(root)
