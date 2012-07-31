@@ -62,8 +62,18 @@ def parse_information(root, sheet, rows):
     
 
 def silent_value(sheet, **args):
+    """ Helper function to convert cell values to strings
+        whilst ignoring possible exceptions.
+    """
     try:
-        return sheet.cell_value(**args)
+        value = sheet.cell_value(**args)
+        if isinstance(value, float):
+            if value == round(value):
+                return unicode(int(value))
+            else:
+                return unicode(value)
+        else:
+            return value
     except IndexError:
         return ''
 
@@ -79,8 +89,8 @@ def full_xml(spreadsheet):
                 silent_value(sheet, rowx=2, colx=6),
                 code=silent_value(sheet, rowx=4, colx=6)
             ),
-            E.version(silent_value(sheet, rowx=7, colx=3)),
-            E.date(silent_value(sheet, rowx=7, colx=6))
+            E.version(silent_value(sheet, rowx=6, colx=3)),
+            E.date(silent_value(sheet, rowx=6, colx=6)) # TODO Add handling of proper excel dates
         ),
         parse_information(
             E.publishing(),
