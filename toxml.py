@@ -2,12 +2,13 @@ import xlrd
 from lxml.builder import ElementMaker
 import lxml.etree as etree
 import datetime
-book = xlrd.open_workbook("schedules/Sweden Implementation Schedule.xls")
-#book = xlrd.open_workbook("IDB-Implementation-Schedule.xls")
-#book = xlrd.open_workbook("IATI-Implementation-Schedule-TEST.xls")
-#book = xlrd.open_workbook("IATI-Implementation-Schedule-TEMPLATE.xls")
 
 import structure
+
+datemode = None
+def get_date(value):
+    global datemode
+    return datetime.datetime(*xlrd.xldate_as_tuple(value, datemode))
 
 def parse_data(root, sheet, rows):
     """ Parse a 'data' sheet.
@@ -36,7 +37,7 @@ def parse_data(root, sheet, rows):
             if cell:
                 a = etree.SubElement(rowxml, heading)
                 if heading in structure.date_tags:
-                    cell = datetime.datetime(*xlrd.xldate_as_tuple(cell, book.datemode))
+                    cell = get_date(cell)
                 a.text = unicode(cell)
         root.append(rowxml)
     return root
@@ -50,7 +51,7 @@ def parse_information(root, sheet, rows):
                 for i in 2,3:
                     if row[i] != '':
                         if row[i] in structure.date_tags and row_data[i].value !='':
-                            el.attrib[row[i]] = unicode(datetime.datetime(*xlrd.xldate_as_tuple(row_data[i].value, book.datemode)))
+                            el.attrib[row[i]] = unicode(get_date(row_data[i].value))
                         else:
                             el.attrib[row[i]] = unicode(row_data[i].value)
                 el.text = row_data[4].value
@@ -66,14 +67,17 @@ def silent_value(sheet, **args):
     except IndexError:
         return ''
 
-def full_xml():
+def full_xml(spreadsheet):
+    global datemode
+    book = xlrd.open_workbook(spreadsheet)
+    datemode = book.datemode
     E = ElementMaker()
     sheet = book.sheet_by_index(0)
     root = E.implementation(
         E.metadata(
             E.publisher(
-                silent_value(sheet, rowx=2, colx=3),
-                code=silent_value(sheet, rowx=4, colx=3)
+                silent_value(sheet, rowx=2, colx=6),
+                code=silent_value(sheet, rowx=4, colx=6)
             ),
             E.version(silent_value(sheet, rowx=7, colx=3)),
             E.date(silent_value(sheet, rowx=7, colx=6))
@@ -157,62 +161,58 @@ def publishingschema(root):
 
 import sys
 if len(sys.argv) > 1:
-    mode = sys.argv[1]
-    E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema")
-    headerchoice = E.all()
-    root = E.schema(
-        E.complexType( 
-            headerchoice,
-            name = "informationArea"
-        ),
-        E.element(
-            E.complexType(
-                E.all(
-                    E.element(
-                        E.complexType(
-                            E.all(
-                                E.element(
-                                    E.complexType(
-                                        E.simpleContent(
-                                            E.extension(
-                                                E.attribute(name="code", type="xs:string"),
-                                                base="xs:string"
-                                            )
-                                        )
-                                    ),
-                                    name="publisher"
-                                ),
-                                E.element(name="version", type="xs:string"),
-                                E.element(name="date", type="xs:string")
-                            ),
-                        ),
-                        name="metadata"
-                    ),
-                    E.element(ref="publishing"),
-                    E.element(ref="organisation"),
-                    E.element(ref="activity"),
-                )
+    if sys.argv[1] == "--schema":
+        E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema")
+        headerchoice = E.all()
+        root = E.schema(
+            E.complexType( 
+                headerchoice,
+                name = "informationArea"
             ),
-            name="implementation"
+            E.element(
+                E.complexType(
+                    E.all(
+                        E.element(
+                            E.complexType(
+                                E.all(
+                                    E.element(
+                                        E.complexType(
+                                            E.simpleContent(
+                                                E.extension(
+                                                    E.attribute(name="code", type="xs:string"),
+                                                    base="xs:string"
+                                                )
+                                            )
+                                        ),
+                                        name="publisher"
+                                    ),
+                                    E.element(name="version", type="xs:string"),
+                                    E.element(name="date", type="xs:string")
+                                ),
+                            ),
+                            name="metadata"
+                        ),
+                        E.element(ref="publishing"),
+                        E.element(ref="organisation"),
+                        E.element(ref="activity"),
+                    )
+                ),
+                name="implementation"
+            )
         )
-    )
-    for heading in structure.header:
-        if heading == '': continue
-        ## Use of xs: here, FIXME
-        headerchoice.append( E.element(name=heading, type="xs:string", minOccurs="0") )
-    sheetschema(root, 'organisation')
-    sheetschema(root, 'activity')
-    publishingschema(root)
-    print '<?xml version="1.0" encoding="utf-8"?>'
-    print(etree.tostring(root, pretty_print=True))
-
+        for heading in structure.header:
+            if heading == '': continue
+            ## Use of xs: here, FIXME
+            headerchoice.append( E.element(name=heading, type="xs:string", minOccurs="0") )
+        sheetschema(root, 'organisation')
+        sheetschema(root, 'activity')
+        publishingschema(root)
+        print '<?xml version="1.0" encoding="utf-8"?>'
+        print(etree.tostring(root, pretty_print=True))
+    else:
+        full_xml(sys.argv[1])
 else:
-    full_xml()
-
-    
-"""
-sheet = book.steet_by_index(3)
-test = []
-for i in xrange(0,sheet.nrows):
-    print "'"+sheet.cell_value(rowx=i, colx=1)+"',"
-    """
+    print """Usage:
+    python toxml.py --schema    -- Generates the XML schema 
+    python toxml.py [filename]  -- Assumes the file is xls and tries
+                                   to generate xml from it"""
