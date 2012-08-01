@@ -182,27 +182,28 @@ def sheetschema(root, sheetname):
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
             if rowname[0] in tuple_rows_done:
-                subroot = tuple_rows_done[rowname[0]]
+                suball = tuple_rows_done[rowname[0]]
             else:
-                subroot = E.all()
-                root.append( E.element(
-                    E.complexType(subroot),
-                    name = rowname[0]
+                suball = E.all()
+                all_el.append( E.element(
+                    E.complexType(suball),
+                    name = rowname[0],
+                    minOccurs="0"
                 ) )
-                all_el.append(E.element(ref=rowname[0], minOccurs="0"))
-                tuple_rows_done[rowname[0]] = subroot 
-            subroot.append( E.element(
+                tuple_rows_done[rowname[0]] = suball 
+            suball.append( E.element(
                 type = "informationArea",
-                name = rowname[2]
+                name = rowname[2],
+                minOccurs="0"
             ) )
         else:
             if rowname == '':
                 continue
-            root.append( E.element(
+            all_el.append( E.element(
                 type = "informationArea",
-                name = rowname
+                name = rowname,
+                minOccurs="0"
             ) )
-            all_el.append(E.element(ref=rowname, minOccurs="0"))
 
 
 def publishingschema(root):
@@ -226,7 +227,8 @@ def publishingschema(root):
                         E.simpleContent(
                             ext
                     ) ),
-                    name=row[1]
+                    name=row[1],
+                    minOccurs="0"
                 )
                 for i in 2,3:
                     if row[i] != '':
@@ -234,9 +236,9 @@ def publishingschema(root):
                             name=row[i],
                             type="xs:string") )
             else:
-                el = E.element(name=row[1], type="xs:string")
-            root.append(el)
-            all_el.append(E.element(ref=row[1], minOccurs="0"))
+                el = E.element(name=row[1], type="xs:string",
+                                                    minOccurs="0")
+            all_el.append(el)
 
 
 def full_schema():
@@ -264,9 +266,12 @@ def full_schema():
         E.element(
             E.complexType(
                 E.all(
-                    E.element(name="publisher", type="codeType"),
-                    E.element(name="version", type="xs:string"),
-                    E.element(name="date", type="xs:string")
+                    E.element(name="publisher", type="codeType",
+                                    minOccurs="0"),
+                    E.element(name="version", type="xs:string",
+                                    minOccurs="0"),
+                    E.element(name="date", type="xs:string",
+                                    minOccurs="0")
                 ),
             ),
             name="metadata"
