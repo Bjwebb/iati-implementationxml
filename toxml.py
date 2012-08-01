@@ -175,9 +175,9 @@ def sheetschema(root, sheetname):
     global E
     rows = vars(structure)[sheetname+'_rows'] 
     tuple_rows_done = {}
-    choice = E.all()
+    all_el = E.all()
     root.append(
-        E.element(E.complexType(choice), name=sheetname)
+        E.element(E.complexType(all_el), name=sheetname)
     )
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
@@ -189,7 +189,7 @@ def sheetschema(root, sheetname):
                     E.complexType(subroot),
                     name = rowname[0]
                 ) )
-                choice.append( E.element(ref=rowname[0]) )
+                all_el.append(E.element(ref=rowname[0], minOccurs="0"))
                 tuple_rows_done[rowname[0]] = subroot 
             subroot.append( E.element(
                 type = "informationArea",
@@ -202,7 +202,7 @@ def sheetschema(root, sheetname):
                 type = "informationArea",
                 name = rowname
             ) )
-            choice.append( E.element(ref=rowname) )
+            all_el.append(E.element(ref=rowname, minOccurs="0"))
 
 
 def publishingschema(root):
@@ -213,9 +213,9 @@ def publishingschema(root):
     """
     global E
     rows = structure.publishing_rows
-    choice = E.all()
+    all_el = E.all()
     root.append(
-        E.element(E.complexType(choice), name="publishing")
+        E.element(E.complexType(all_el), name="publishing")
     )
     for rowx,row in enumerate(rows):
         if row:
@@ -236,7 +236,7 @@ def publishingschema(root):
             else:
                 el = E.element(name=row[1], type="xs:string")
             root.append(el)
-            choice.append( E.element(ref=row[1]) )
+            all_el.append(E.element(ref=row[1], minOccurs="0"))
 
 
 def full_schema():
@@ -244,10 +244,10 @@ def full_schema():
     global E
     E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema",
                      nsmap={'xs':"http://www.w3.org/2001/XMLSchema"})
-    headerchoice = E.all()
+    headerall = E.all()
     root = E.schema(
         E.complexType( 
-            headerchoice,
+            headerall,
             name = "informationArea"
         ),
         E.element(
@@ -287,7 +287,7 @@ def full_schema():
             t = 'codeType'
         else:
             t = 'xs:string'
-        headerchoice.append( E.element(name=heading, type=t) )
+        headerall.append(E.element(name=heading, type=t, minOccurs="0"))
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
     publishingschema(root)
