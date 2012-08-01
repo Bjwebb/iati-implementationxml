@@ -163,7 +163,7 @@ codes = {
                         'Other': 'o',
                         'Single file': 's'},
     # Staff resource
-    'resource': { 'Ad hoc': 'a',
+    'UNUSED3': { 'Ad hoc': 'a',
                   'Dedicated resource': 'd',
                   'Other': 'o',
                   'Working group': 'w'},

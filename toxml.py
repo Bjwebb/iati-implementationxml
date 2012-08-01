@@ -176,8 +176,26 @@ def sheetschema(root, sheetname):
     rows = vars(structure)[sheetname+'_rows'] 
     tuple_rows_done = {}
     all_el = E.all()
+    ann = {
+        "activity": """
+        Contains information about the data provider's plans to implement
+        specific parts of the activity data.
+
+        Each of the child elements if either an informationArea, or a
+        list of informationAreas.
+
+        """, "organisation":"""
+        Contains information about the data provider's plans to implement
+        specific parts of the organisation data.
+
+        """
+    }
     root.append(
-        E.element(E.complexType(all_el), name=sheetname)
+        E.element(
+            E.annotation(lang("en", E.documentation(ann[sheetname]))),
+            E.complexType(all_el),
+            name=sheetname
+        )
     )
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
@@ -216,7 +234,19 @@ def publishingschema(root):
     rows = structure.publishing_rows
     all_el = E.all()
     root.append(
-        E.element(E.complexType(all_el), name="publishing")
+        E.element(
+            E.annotation(lang("en", E.documentation("""
+            Contains information about when and how data will be
+            published, including any general exceptions.
+
+            All child elements may only contain text, but may also have
+            attributes. These may contain short codes - the list these
+            codes can be found at http://iati.bjwebb.co.uk/codes.txt
+
+            """))),
+            E.complexType(all_el),
+            name="publishing"
+        )
     )
     for rowx,row in enumerate(rows):
         if row:
@@ -240,19 +270,53 @@ def publishingschema(root):
                                                     minOccurs="0")
             all_el.append(el)
 
+def lang(code, el):
+    """ Helper function to add language code to an element, since
+        Elementmaker syntax does not support namespaces.
+
+    """
+    el.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = code
+    return el
+
 
 def full_schema():
     """ Print the full schema, based on the definitions in structure.py"""
     global E
     E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema",
-                     nsmap={'xs':"http://www.w3.org/2001/XMLSchema"})
+                     nsmap={'xs':"http://www.w3.org/2001/XMLSchema",
+                            'xml':"http://www.w3.org/XML/1998/namespace"})
     headerall = E.all()
     root = E.schema(
+        E.annotation(lang("en", E.documentation("""
+        International Aid Transparency Initiative: Implementation
+        Schedule Schema Draft Release, 2012-08-01
+
+        This W3C XML Schema defines an XML document type for an
+        Implementation Schedule of an IATI data provider.
+
+        """))),
         E.complexType( 
+            E.annotation(lang("en", E.documentation("""
+            Type that corresponds to a row of the Activity or Organsation
+            spreadsheets. Describes the implementation of a specific
+            field, or type of information by the data provider.
+
+            All fields are simple strings, except for exclusion which has a code attribute. The meaning of these codes are:
+            a   =    Not applicable to organisation,
+            b   =    A non-disclosure policy,
+            c   =    Not currently captured and prohibitive cost,
+            d   =    Other
+
+            """))),
             headerall,
             name = "informationArea"
         ),
         E.element(
+            E.annotation(lang("en", E.documentation("""
+            Top level element containg elements for each of the top level
+            types of information found in the implementation schedule.
+
+            """))),
             E.complexType(
                 E.all(
                     E.element(ref="metadata"),
@@ -264,6 +328,9 @@ def full_schema():
             name="implementation"
         ),
         E.element(
+            E.annotation(lang("en", E.documentation("""
+            Various metadata about the implementation schedule.
+            """))),
             E.complexType(
                 E.all(
                     E.element(name="publisher", type="codeType",
@@ -277,6 +344,10 @@ def full_schema():
             name="metadata"
         ),
         E.complexType(
+            E.annotation(lang("en", E.documentation("""
+            Type for elements that contain a string, but also have a code
+            attribute. 
+            """))),
             E.simpleContent(
                 E.extension(
                     E.attribute(name="code", type="xs:string"),
