@@ -18,6 +18,14 @@ def get_date(value):
     except ValueError:
         return ''
 
+def use_code(heading, text):
+    if heading in structure.codes:
+        if text == '': return ''
+        return structure.codes[heading][text]
+    else:
+        return text
+
+
 def parse_data(root, sheet, rows):
     """ Parse a 'data' sheet.
         ie. Activity Data or Organisation Data
@@ -59,7 +67,8 @@ def parse_data(root, sheet, rows):
                     if next_cell == '':
                         continue
                     else:
-                        el.attrib['code'] = unicode(next_cell)
+                        el.attrib['code'] = use_code(heading,
+                                                unicode(next_cell))
                 except IndexError:
                     continue
         root.append(rowxml)
@@ -85,7 +94,8 @@ def parse_information(root, sheet, rows):
                         if row[i] in structure.date_tags and row_data[i].value !='':
                             el.attrib[row[i]] = get_date(row_data[i].value)
                         else:
-                            el.attrib[row[i]] = unicode(row_data[i].value)
+                            el.attrib[row[i]] = use_code(row[i],
+                                    unicode(row_data[i].value))
                 el.text = row_data[4].value
             else:
                 el.text = "".join(map(lambda x: x.value, row_data[2:4]))
@@ -215,7 +225,9 @@ def publishingschema(root):
                 )
                 for i in 2,3:
                     if row[i] != '':
-                        ext.append( E.attribute(name=row[i], type="xs:string") )
+                        ext.append( E.attribute(
+                            name=row[i],
+                            type="xs:string") )
             else:
                 el = E.element(name=row[1], type="xs:string")
             choice.append(el)

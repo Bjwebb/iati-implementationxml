@@ -76,7 +76,7 @@ publishing_rows = [
     ('', 'publication-frequency', 'frequency', 'timeliness', 'narrative'), #TIMEFREQ
     (),
     (),
-    ('', 'publication-lifecyle', 'status', '', 'narrative'), #LIFECYCLE
+    ('', 'publication-lifecyle', 'point', '', 'narrative'), #LIFECYCLE
     (),
     (),
     ('', 'data-quality', 'quality', '', 'narrative'), #DATAQUAL
@@ -120,3 +120,69 @@ codes = {
         'status': { 'NO':'N', 'PARTIAL':'P', 'YES':'Y' },
         'yesno': { 'Yes': 'y', 'No': 'n' }
     }
+
+codes = {   
+    # Data quality
+    'quality': {   'Unverified': 'u', 'Verified': 'v'},
+    # Exclusions
+    'exclusion': {   'a) Not applicable to organisation': 'a',
+                      'b) A non-disclosure policy': 'b',
+                      'c) Not currently captured and prohibitive cost': 'c',
+                      'd) Other': 'd'},
+    # Frequency
+    'frequency': {   'Annually': 'a',
+                     'Bi-annually': 'b',
+                     'Fortnightly': 'f',
+                     'Monthly': 'm',
+                     'Other': 'o',
+                     'Quarterly': 'q',
+                     'Real time': 'r',
+                     'Weekly': 'w'},
+    # License type
+    'license': {    'Attribution-only': 'a',
+                    'Other (non-compliant)': 'o',
+                    'Public domain': 'p'},
+    # Lifecyle
+    'point': {   'Implementation': 'i',
+                                 'Other': 'o',
+                                 'Pipeline/identification': 'p'},
+    # Multi-level reporting
+    'yesno': {   'No': 'n', 'Yes': 'y'},
+    # Multi-level type
+    'UNUSED': { 'Both': 'b',
+                'Hierarchy': 'h',
+                'Related activities': 'r'},
+    'RAG': {   'Fully compliant': 'fc',
+               'Future publication': 'fp',
+               'Partially compliant': 'pc',
+               'Unable to publish': 'up',
+               'Under consideration': 'uc'},
+    # Segmentation
+    'segmentation': {   'By country / region': 'b',
+                        'Other': 'o',
+                        'Single file': 's'},
+    # Staff resource
+    'resource': {   'Ad hoc': 'a',
+                          'Dedicated resource': 'd',
+                          'Other': 'o',
+                          'Working group': 'w'},
+    # System resource
+    'resource': {   'Direct feed from internal systems': 'd',
+                           'Excel spreadsheet conversion': 'e',
+                           'Manual capture through an online tool (web entry platform)': 'm',
+                           'Other': 'o'},
+    # Timeliness
+    'timeliness': {   '1 month in arrears': '1m',
+                      '1 quarter in arrears': '1q',
+                      '1 week in arrears': '1w',
+                      '2 months in arrears': '2m',
+                      '2 weeks in arrears': '2w',
+                      '> 1 quarter in arrears': 'gt',
+                      'Other': 'o',
+                      'Real time': 'r'},
+    # User interface
+    'status': {   'In development': 'i',
+                  'No': 'n',
+                  'Under consideration': 'u',
+                  'Yes': 'y'}}
+
