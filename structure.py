@@ -15,7 +15,7 @@ activity_rows = [
     'iati-identifier',
     'other-identifier',
     '', #Basic Activity Information',
-    ('title', 'lang', 'agency'), # Ideally bunch these up?
+    ('title', 'lang', 'agency'),
     ('title', 'lang', 'recipient' ),
     ('description', 'lang', 'agency'),
     ('description', 'lang', 'recipient'),
@@ -125,7 +125,7 @@ codes = {
     # Data quality
     'quality': {   'Unverified': 'u', 'Verified': 'v'},
     # Exclusions
-    'exclusion': {   'a) Not applicable to organisation': 'a',
+    'exclusion': {    'a) Not applicable to organisation': 'a',
                       'b) A non-disclosure policy': 'b',
                       'c) Not currently captured and prohibitive cost': 'c',
                       'd) Other': 'd'},
@@ -144,15 +144,16 @@ codes = {
                     'Public domain': 'p'},
     # Lifecyle
     'point': {   'Implementation': 'i',
-                                 'Other': 'o',
-                                 'Pipeline/identification': 'p'},
+                 'Other': 'o',
+                 'Pipeline/identification': 'p'},
     # Multi-level reporting
     'yesno': {   'No': 'n', 'Yes': 'y'},
     # Multi-level type
     'UNUSED': { 'Both': 'b',
                 'Hierarchy': 'h',
                 'Related activities': 'r'},
-    'RAG': {   'Fully compliant': 'fc',
+    # RAG
+    'UNUSED2': {   'Fully compliant': 'fc',
                'Future publication': 'fp',
                'Partially compliant': 'pc',
                'Unable to publish': 'up',
@@ -162,15 +163,15 @@ codes = {
                         'Other': 'o',
                         'Single file': 's'},
     # Staff resource
-    'resource': {   'Ad hoc': 'a',
-                          'Dedicated resource': 'd',
-                          'Other': 'o',
-                          'Working group': 'w'},
+    'resource': { 'Ad hoc': 'a',
+                  'Dedicated resource': 'd',
+                  'Other': 'o',
+                  'Working group': 'w'},
     # System resource
-    'resource': {   'Direct feed from internal systems': 'd',
-                           'Excel spreadsheet conversion': 'e',
-                           'Manual capture through an online tool (web entry platform)': 'm',
-                           'Other': 'o'},
+    'resource': {  'Direct feed from internal systems': 'd',
+                   'Excel spreadsheet conversion': 'e',
+                   'Manual capture through an online tool (web entry platform)': 'm',
+                   'Other': 'o'},
     # Timeliness
     'timeliness': {   '1 month in arrears': '1m',
                       '1 quarter in arrears': '1q',
