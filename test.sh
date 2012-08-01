@@ -13,3 +13,5 @@ for f in xml/*.xml; do
     xmllint --schema xml/implementation.xsd "$f" --noout;
 done
 
+xsltproc xs3p/xs3p.xsl xml/implementation.xsd > doc/index.html
+

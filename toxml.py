@@ -19,6 +19,10 @@ def get_date(value):
         return ''
 
 def use_code(heading, text):
+    """ Helper function to return the short code for a given heading
+        and text value.
+
+    """
     if heading in structure.codes:
         if text == '': return ''
         return structure.codes[heading][text]
@@ -35,17 +39,19 @@ def parse_data(root, sheet, rows):
         rows -- a list of xml tags that correspond to each row
         
     """
+    tuple_rows_done = {}
     for rowx,rowname in enumerate(rows):
         if rowname == '':
             continue
-        # rowname may be a tuple or a string
-        # ('a', 'b', 'c')  ->  <a b="c">
         if isinstance(rowname, tuple):
-            rowxml = etree.Element(rowname[0],
-                                    {rowname[1]:rowname[2]})
-        # 'string'  ->  <string>
+            if rowname[0] in tuple_rows_done:
+                subroot = tuple_rows_done[rowname[0]]
+            else:
+                subroot = etree.SubElement(root, rowname[0])
+                tuple_rows_done[rowname[0]] = subroot
+            rowxml = etree.SubElement(subroot, rowname[2])
         else:
-            rowxml = etree.Element(rowname)
+            rowxml = etree.SubElement(root, rowname)
         
         for colx, heading in enumerate(structure.header):
             if heading == '':
@@ -71,7 +77,6 @@ def parse_data(root, sheet, rows):
                                                 unicode(next_cell))
                 except IndexError:
                     continue
-        root.append(rowxml)
     return root
 
 
@@ -169,27 +174,27 @@ def sheetschema(root, sheetname):
     """
     global E
     rows = vars(structure)[sheetname+'_rows'] 
-    tuple_rows_done = []
-    choice = E.choice(maxOccurs="unbounded")
+    tuple_rows_done = {}
+    choice = E.all()
     root.append(
         E.element(E.complexType(choice), name=sheetname)
     )
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
             if rowname[0] in tuple_rows_done:
-                continue
+                subroot = tuple_rows_done[rowname[0]]
             else:
-                tuple_rows_done.append(rowname[0])
-            root.append( E.element(
-                E.complexType( E.complexContent(
-                    E.extension(
-                        E.attribute(name=rowname[1], type="xs:string", use="required"), 
-                        base="informationArea",
-                    )
-                ) ),
-                name = rowname[0]
-            ) ) 
-            choice.append( E.element(ref=rowname[0]) )
+                subroot = E.all()
+                root.append( E.element(
+                    E.complexType(subroot),
+                    name = rowname[0]
+                ) )
+                choice.append( E.element(ref=rowname[0]) )
+                tuple_rows_done[rowname[0]] = subroot 
+            subroot.append( E.element(
+                type = "informationArea",
+                name = rowname[2]
+            ) )
         else:
             if rowname == '':
                 continue
@@ -208,7 +213,7 @@ def publishingschema(root):
     """
     global E
     rows = structure.publishing_rows
-    choice = E.choice(maxOccurs="unbounded")
+    choice = E.all()
     root.append(
         E.element(E.complexType(choice), name="publishing")
     )
@@ -230,7 +235,8 @@ def publishingschema(root):
                             type="xs:string") )
             else:
                 el = E.element(name=row[1], type="xs:string")
-            choice.append(el)
+            root.append(el)
+            choice.append( E.element(ref=row[1]) )
 
 
 def full_schema():
