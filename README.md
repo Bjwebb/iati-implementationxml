@@ -22,6 +22,9 @@ Then
     wget "http://iati.bjwebb.co.uk/schedules.tar.gz"
     tar -xvzf schedules.tar.gz
     mkdir xml
+    cd xml
+    wget "http://www.w3.org/2009/01/xml.xsd"
+    cd ..
     ./test.sh
 
 The xml directory should then have several validating xml files, and

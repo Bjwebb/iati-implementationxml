@@ -60,23 +60,27 @@ def parse_data(root, sheet, rows):
                 cell = sheet.cell_value(rowx=rowx, colx=colx)
             except IndexError:
                 continue
-            el = etree.SubElement(rowxml, heading)
-            if heading in structure.date_tags:
-                cell = get_date(cell)
-            else:
-                cell = unicode(cell)
-            if cell != '':
-                el.text = cell
             if heading == 'exclusion':
+                el = etree.SubElement(rowxml, 'exclusions')
+                narrative_el = etree.SubElement(el, 'narrative')
+                narrative_el.text = unicode(cell)
                 try:
                     next_cell = unicode(sheet.cell_value(rowx=rowx, colx=colx+1))
                     if next_cell == '':
                         continue
                     else:
-                        el.attrib['code'] = use_code(heading,
+                        el.attrib['category'] = use_code(heading,
                                                 unicode(next_cell))
                 except IndexError:
                     continue
+            else:
+                el = etree.SubElement(rowxml, heading)
+                if heading in structure.date_tags:
+                    cell = get_date(cell)
+                else:
+                    cell = unicode(cell)
+                if cell != '':
+                    el.text = cell
     return root
 
 
@@ -92,6 +96,7 @@ def parse_information(root, sheet, rows):
     for rowx,row in enumerate(rows):
         if row:
             el = etree.SubElement(root, row[1])
+            narrative_el = etree.SubElement(el, 'narrative')
             row_data = sheet.row(rowx)
             if row[4] == 'narrative':
                 for i in 2,3:
@@ -101,9 +106,9 @@ def parse_information(root, sheet, rows):
                         else:
                             el.attrib[row[i]] = use_code(row[i],
                                     unicode(row_data[i].value))
-                el.text = row_data[4].value
+                narrative_el.text = row_data[4].value
             else:
-                el.text = "".join(map(lambda x: x.value, row_data[2:4]))
+                narrative_el.text = "".join(map(lambda x: x.value, row_data[2:4]))
                 
     return root
     
@@ -251,10 +256,10 @@ def publishingschema(root):
     for rowx,row in enumerate(rows):
         if row:
             if row[4] == "narrative":
-                ext = E.extension(base="xs:string")
+                ext = E.extension(base="narrativeParent")
                 el = E.element(
                     E.complexType(
-                        E.simpleContent(
+                        E.complexContent(
                             ext
                     ) ),
                     name=row[1],
@@ -266,8 +271,7 @@ def publishingschema(root):
                             name=row[i],
                             type="xs:string") )
             else:
-                el = E.element(name=row[1], type="xs:string",
-                                                    minOccurs="0")
+                el = E.element(name=row[1], type="narrativeParent")
             all_el.append(el)
 
 def lang(code, el):
@@ -285,8 +289,12 @@ def full_schema():
     E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema",
                      nsmap={'xs':"http://www.w3.org/2001/XMLSchema",
                             'xml':"http://www.w3.org/XML/1998/namespace"})
-    headerall = E.all()
+    headerchoice = E.choice(maxOccurs="unbounded", minOccurs="0")
     root = E.schema(
+        # Different syntax to avoid clash with python's import statement
+        etree.Element("{http://www.w3.org/2001/XMLSchema}import",
+            {'namespace':"http://www.w3.org/XML/1998/namespace",
+            'schemaLocation':"xml.xsd"}),
         E.annotation(lang("en", E.documentation("""
         International Aid Transparency Initiative: Implementation
         Schedule Schema Draft Release, 2012-08-01
@@ -308,7 +316,7 @@ def full_schema():
             d   =    Other
 
             """))),
-            headerall,
+            headerchoice,
             name = "informationArea"
         ),
         E.element(
@@ -332,16 +340,26 @@ def full_schema():
             Various metadata about the implementation schedule.
             """))),
             E.complexType(
-                E.all(
-                    E.element(name="publisher", type="codeType",
-                                    minOccurs="0"),
-                    E.element(name="version", type="xs:string",
-                                    minOccurs="0"),
-                    E.element(name="date", type="xs:string",
-                                    minOccurs="0")
+                E.choice(
+                    E.element(name="publisher", type="codeType"),
+                    E.element(name="version", type="textType"),
+                    E.element(name="date", type="textType"),
+                    minOccurs="0", maxOccurs="unbounded"
                 ),
             ),
             name="metadata"
+        ),
+        E.element(
+            type="textType",
+            name="narrative"
+        ),
+        E.complexType(
+            E.choice(
+                E.element(ref="narrative"),
+                maxOccurs="unbounded",
+                minOccurs="0"
+            ),
+            name="narrativeParent"
         ),
         E.complexType(
             E.annotation(lang("en", E.documentation("""
@@ -351,19 +369,40 @@ def full_schema():
             E.simpleContent(
                 E.extension(
                     E.attribute(name="code", type="xs:string"),
-                    base="xs:string"
+                    base="textType"
                 )
             ),
             name="codeType"
         ),
+        E.complexType(
+            E.simpleContent(
+                E.extension(
+                    E.attribute(ref="xml:lang"),
+                    base="xs:string"
+                )
+            ),
+            name="textType"
+        )
     )
     for heading in structure.header:
         if heading == '': continue
         if heading == 'exclusion':
             t = 'codeType'
+            headerchoice.append(
+                E.element(
+                    E.complexType( E.choice(
+                        E.element(name="narrative",
+                                  type="textType"),
+                        maxOccurs="unbounded"
+                    ),
+                    E.attribute(name="category", type="xs:string"),
+                    ),
+                    name="exclusions"
+                ),
+            )
         else:
-            t = 'xs:string'
-        headerall.append(E.element(name=heading, type=t, minOccurs="0"))
+            headerchoice.append(E.element(name=heading, type="textType",
+                                                minOccurs="0"))
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
     publishingschema(root)
