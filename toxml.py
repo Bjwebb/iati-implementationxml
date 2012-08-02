@@ -33,14 +33,14 @@ def get_date(value):
     except ValueError:
         return ''
 
-def use_code(heading, text):
+def use_code(heading, text, codes=structure.codes):
     """ Helper function to return the short code for a given heading
         and text value.
 
     """
-    if heading in structure.codes:
+    if heading in codes:
         if text == '': return ''
-        return structure.codes[heading][text]
+        return codes[heading][text]
     else:
         return text
 
@@ -75,19 +75,23 @@ def parse_data(root, sheet, rows):
                 cell = sheet.cell_value(rowx=rowx, colx=colx)
             except IndexError:
                 continue
-            if heading == 'exclusion':
-                el = etree.SubElement(rowxml, 'exclusions')
-                narrative_el = etree.SubElement(el, 'narrative')
-                narrative_el.text = unicode(cell)
-                try:
-                    next_cell = unicode(sheet.cell_value(rowx=rowx, colx=colx+1))
-                    if next_cell == '':
+            if heading in structure.codes_activity:
+                el = etree.SubElement(rowxml, heading)
+                if heading == 'exclusions':
+                    narrative_el = etree.SubElement(el, 'narrative')
+                    narrative_el.text = unicode(cell)
+                    try:
+                        attrib_cell = unicode(sheet.cell_value(rowx=rowx, colx=colx+1))
+                    except IndexError:
                         continue
-                    else:
-                        el.attrib['category'] = use_code(heading,
-                                                unicode(next_cell))
-                except IndexError:
+                else:
+                    attrib_cell = cell
+                if attrib_cell == '':
                     continue
+                else:
+                    el.attrib['category'] = use_code(heading,
+                                        unicode(attrib_cell),
+                                        codes=structure.codes_activity)
             else:
                 if heading in structure.date_tags:
                     cell = get_date(cell)
@@ -339,11 +343,9 @@ def full_schema():
             spreadsheets. Describes the implementation of a specific
             field, or type of information by the data provider.
 
-            All fields are simple strings, except for exclusion which has a code attribute. The meaning of these codes are:
-            a   =    Not applicable to organisation,
-            b   =    A non-disclosure policy,
-            c   =    Not currently captured and prohibitive cost,
-            d   =    Other
+            Status and exclusion have attributes, containing coded values
+            - a list of these codes can be found at
+            http://iati.bjwebb.co.uk/codes_activity.txt
 
             """))),
             headerchoice,
@@ -445,17 +447,20 @@ def full_schema():
     )
     for heading in structure.header:
         if heading == '': continue
-        if heading == 'exclusion':
+        if heading in structure.codes_activity: 
+            complexType = E.complexType( 
+                E.attribute(name="category", type="xs:string")
+            )
+            if heading == 'exclusions':
+                complexType.append( E.choice(
+                    E.element(name="narrative",
+                              type="textType"),
+                    maxOccurs="unbounded"
+                ) )
             headerchoice.append(
-                E.element(
-                    E.complexType( E.choice(
-                        E.element(name="narrative",
-                                  type="textType"),
-                        maxOccurs="unbounded"
-                    ),
-                    E.attribute(name="category", type="xs:string"),
-                    ),
-                    name="exclusions"
+                E.element( 
+                    complexType,
+                    name=heading
                 ),
             )
         else:

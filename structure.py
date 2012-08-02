@@ -117,19 +117,24 @@ publishing_rows = [
 
 date_tags = [ 'publication-date', 'date-initial', 'date-full' ]
 decimal_tags = [ 'value' ]
-codes = {
-        'status': { 'NO':'N', 'PARTIAL':'P', 'YES':'Y' },
-        'yesno': { 'Yes': 'y', 'No': 'n' }
-    }
+
+codes_activity = {
+    # Status
+    'status': {    'Fully compliant': 'fc',
+                   'Future publication': 'fp',
+                   'Partially compliant': 'pc',
+                   'Unable to publish': 'up',
+                   'Under consideration': 'uc'},
+    # Exclusions
+    'exclusions': {    'a) Not applicable to organisation': 'a',
+                      'b) A non-disclosure policy': 'b',
+                      'c) Not currently captured and prohibitive cost': 'c',
+                      'd) Other': 'd'}
+}
 
 codes = {   
     # Data quality
     'quality': {   'Unverified': 'u', 'Verified': 'v'},
-    # Exclusions
-    'exclusion': {    'a) Not applicable to organisation': 'a',
-                      'b) A non-disclosure policy': 'b',
-                      'c) Not currently captured and prohibitive cost': 'c',
-                      'd) Other': 'd'},
     # Frequency
     'frequency': {   'Annually': 'a',
                      'Bi-annually': 'b',
@@ -153,18 +158,12 @@ codes = {
     'UNUSED': { 'Both': 'b',
                 'Hierarchy': 'h',
                 'Related activities': 'r'},
-    # RAG
-    'UNUSED2': {   'Fully compliant': 'fc',
-               'Future publication': 'fp',
-               'Partially compliant': 'pc',
-               'Unable to publish': 'up',
-               'Under consideration': 'uc'},
     # Segmentation
     'segmentation': {   'By country / region': 'b',
                         'Other': 'o',
                         'Single file': 's'},
     # Staff resource
-    'UNUSED3': { 'Ad hoc': 'a',
+    'UNUSED2': {  'Ad hoc': 'a',
                   'Dedicated resource': 'd',
                   'Other': 'o',
                   'Working group': 'w'},
