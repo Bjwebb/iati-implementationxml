@@ -116,6 +116,7 @@ publishing_rows = [
 ]
 
 date_tags = [ 'publication-date', 'date-initial', 'date-full' ]
+decimal_tags = [ 'value' ]
 codes = {
         'status': { 'NO':'N', 'PARTIAL':'P', 'YES':'Y' },
         'yesno': { 'Yes': 'y', 'No': 'n' }

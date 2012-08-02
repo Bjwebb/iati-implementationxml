@@ -15,7 +15,7 @@ If you haven't already, clone the git repository
 
 Install the required python dependencies. E.g. on Debian, run:
 
-    sudo aptitude install python-lxml python-xlrd
+    sudo aptitude install python-lxml python-xlrd python-parsedatetime
 
 Then
 

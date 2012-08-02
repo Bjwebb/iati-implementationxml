@@ -2,6 +2,7 @@ import xlrd
 from lxml.builder import ElementMaker
 import lxml.etree as etree
 import datetime
+import parsedatetime.parsedatetime as pdt
 
 import structure
 
@@ -14,7 +15,7 @@ def get_date(value):
     global datemode
     try:
         date = datetime.datetime(*xlrd.xldate_as_tuple(value, datemode))
-        return unicode(date)
+        return date.date().isoformat()
     except ValueError:
         return ''
 
@@ -74,12 +75,12 @@ def parse_data(root, sheet, rows):
                 except IndexError:
                     continue
             else:
-                el = etree.SubElement(rowxml, heading)
                 if heading in structure.date_tags:
                     cell = get_date(cell)
                 else:
                     cell = unicode(cell)
                 if cell != '':
+                    el = etree.SubElement(rowxml, heading)
                     el.text = cell
     return root
 
@@ -101,8 +102,10 @@ def parse_information(root, sheet, rows):
             if row[4] == 'narrative':
                 for i in 2,3:
                     if row[i] != '':
-                        if row[i] in structure.date_tags and row_data[i].value !='':
-                            el.attrib[row[i]] = get_date(row_data[i].value)
+                        if row[i] in structure.date_tags:
+                            d = get_date(row_data[i].value)
+                            if d != '':
+                                el.attrib[row[i]] = d
                         else:
                             el.attrib[row[i]] = use_code(row[i],
                                     unicode(row_data[i].value))
@@ -139,6 +142,12 @@ def full_xml(spreadsheet):
     book = xlrd.open_workbook(spreadsheet)
     datemode = book.datemode
     sheet = book.sheet_by_index(0)
+
+    # TODO Add handling of proper excel dates
+    pdt_cal = pdt.Calendar()
+    date_tuple = pdt_cal.parse(silent_value(sheet, rowx=6, colx=6))
+    datestring = '-'.join([str(x).zfill(2) for x in date_tuple[0][0:3]])
+
     root = E.implementation(
         E.metadata(
             E.publisher(
@@ -146,7 +155,7 @@ def full_xml(spreadsheet):
                 code=silent_value(sheet, rowx=4, colx=6)
             ),
             E.version(silent_value(sheet, rowx=6, colx=3)),
-            E.date(silent_value(sheet, rowx=6, colx=6)) # TODO Add handling of proper excel dates
+            E.date(datestring) 
         ),
         parse_information(
             E.publishing(),
@@ -267,9 +276,15 @@ def publishingschema(root):
                 )
                 for i in 2,3:
                     if row[i] != '':
+                        if row[i] in structure.date_tags:
+                            t = "xs:date"
+                        elif row[i] in structure.decimal_tags:
+                            t = "xs:decimal"
+                        else:
+                            t = "xs:string"
                         ext.append( E.attribute(
                             name=row[i],
-                            type="xs:string") )
+                            type=t) )
             else:
                 el = E.element(name=row[1], type="narrativeParent")
             all_el.append(el)
@@ -343,7 +358,7 @@ def full_schema():
                 E.choice(
                     E.element(name="publisher", type="codeType"),
                     E.element(name="version", type="textType"),
-                    E.element(name="date", type="textType"),
+                    E.element(name="date", type="xs:date"),
                     minOccurs="0", maxOccurs="unbounded"
                 ),
             ),
@@ -387,7 +402,6 @@ def full_schema():
     for heading in structure.header:
         if heading == '': continue
         if heading == 'exclusion':
-            t = 'codeType'
             headerchoice.append(
                 E.element(
                     E.complexType( E.choice(
@@ -401,7 +415,11 @@ def full_schema():
                 ),
             )
         else:
-            headerchoice.append(E.element(name=heading, type="textType",
+            if heading in structure.date_tags:
+                t = "xs:date"
+            else:
+                t = "textType"
+            headerchoice.append(E.element(name=heading, type=t,
                                                 minOccurs="0"))
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
