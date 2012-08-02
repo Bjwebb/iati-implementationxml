@@ -162,7 +162,8 @@ def full_xml(spreadsheet):
     date_tuple = pdt_cal.parse(silent_value(sheet, rowx=6, colx=6))
     datestring = '-'.join([str(x).zfill(2) for x in date_tuple[0][0:3]])
 
-    root = E.implementation(
+    # TODO Make default language configurable
+    root = lang("en", E.implementation(
         E.metadata(
             E.publisher(
                 silent_value(sheet, rowx=2, colx=6),
@@ -186,7 +187,7 @@ def full_xml(spreadsheet):
             book.sheet_by_index(3),
             structure.activity_rows
         )
-    )
+    ))
     print '<?xml version="1.0" encoding="utf-8"?>'
     print(etree.tostring(root, pretty_print=True))
 
@@ -353,6 +354,9 @@ def full_schema():
             Top level element containg elements for each of the top level
             types of information found in the implementation schedule.
 
+            The xml:lang attribute can be used to specify a default
+            language for text in the document.
+
             """))),
             E.complexType(
                 E.all(
@@ -360,13 +364,15 @@ def full_schema():
                     E.element(ref="publishing"),
                     E.element(ref="organisation"),
                     E.element(ref="activity"),
-                )
+                ),
+                E.attribute(ref="xml:lang")
             ),
             name="implementation"
         ),
         E.element(
             E.annotation(lang("en", E.documentation("""
             Various metadata about the implementation schedule.
+
             """))),
             E.complexType(
                 E.choice(
@@ -379,10 +385,22 @@ def full_schema():
             name="metadata"
         ),
         E.element(
+            E.annotation(lang("en", E.documentation("""
+            Element for enclosing long pieces of human readable text, in
+            order to allow multiple translations whilst retaining the
+            uniqueness of the parent object.
+
+            """))),
             type="textType",
             name="narrative"
         ),
         E.complexType(
+            E.annotation(lang("en", E.documentation("""
+            Type for elements that may contain one or more narrative
+            elements. Thus this element can be unique, and contain text
+            in multiple languages. 
+
+            """))),
             E.choice(
                 E.element(ref="narrative"),
                 maxOccurs="unbounded",
@@ -394,6 +412,7 @@ def full_schema():
             E.annotation(lang("en", E.documentation("""
             Type for elements that contain a string, but also have a code
             attribute. 
+
             """))),
             E.simpleContent(
                 E.extension(
@@ -404,6 +423,17 @@ def full_schema():
             name="codeType"
         ),
         E.complexType(
+            E.annotation(lang("en", E.documentation("""
+            Type for elements containing human readable text. Supports
+            the xml:lang attribute in order to indicate the language of
+            the text. Any element of this type should be repeatable in
+            order to provide multiple translations within one xml
+            document.
+
+            If no language is indicated, the value specified by the root
+            element is used.
+
+            """))),
             E.simpleContent(
                 E.extension(
                     E.attribute(ref="xml:lang"),
