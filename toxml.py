@@ -192,8 +192,7 @@ def full_xml(spreadsheet):
             structure.activity_rows
         )
     ))
-    print '<?xml version="1.0" encoding="utf-8"?>'
-    print(etree.tostring(root, pretty_print=True))
+    return root
 
 
 def sheetschema(root, sheetname):
@@ -473,16 +472,19 @@ def full_schema():
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
     publishingschema(root)
-    print '<?xml version="1.0" encoding="utf-8"?>'
-    print(etree.tostring(root, pretty_print=True))
+    return root
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:
         if sys.argv[1] == "--schema":
-            full_schema()
+            xml = full_schema()
         else:
-            full_xml(sys.argv[1])
+            xml = full_xml(sys.argv[1])
+        print etree.tostring(xml,
+                             pretty_print=True,
+                             xml_declaration=True,
+                             encoding="utf-8")
     else:
         print """Usage:
         python toxml.py --schema    -- Generates the XML schema 
