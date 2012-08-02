@@ -33,7 +33,7 @@ Then
     cd ..
     ./batch.sh
 
-The xml/ directory should then have several validating xml files, and
+The `xml/` directory should then have several validating xml files, and
 a corresponding schema.
 
 More Options
@@ -50,5 +50,5 @@ The schema closely follows the structure of the spreadsheets, with each of the c
 
 The schema contains inline documentation. In addition, an auto-extracted HTML version can be found at http://iati.bjwebb.co.uk/doc/
 
-If you wish to generate the documentation yourself, you need [xs3p](http://xml.fiforms.org/xs3p/). See doc.sh for an example of usage.
+If you wish to generate the documentation yourself, you need [xs3p](http://xml.fiforms.org/xs3p/). See `doc.sh` for an example of usage.
 
