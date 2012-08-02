@@ -25,7 +25,7 @@ Then
     cd xml
     wget "http://www.w3.org/2009/01/xml.xsd"
     cd ..
-    ./test.sh
+    ./batch.sh
 
 The xml directory should then have several validating xml files, and
 a corresponding schema.
