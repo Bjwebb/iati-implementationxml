@@ -1,6 +1,6 @@
 header = ['','','', 'status', 'publication-date', 'exclusion', '', 'provider-definition', 'notes']
 
-organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'documents'] 
+organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'document-link'] 
 
 activity_rows = [
     '',
