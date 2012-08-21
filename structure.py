@@ -47,7 +47,7 @@ activity_rows = [
     '', #Financial Transaction',
     ('transaction', 'type', 'commitment'),
     ('transaction', 'type', 'disbursement'),
-    ('transcation', 'type', 'reimbursement'),
+    ('transaction', 'type', 'reimbursement'),
     ('transaction', 'type', 'incoming'),
     ('transaction', 'type', 'repayment'),
     '', #Related Documents',

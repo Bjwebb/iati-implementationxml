@@ -73,12 +73,11 @@ def parse_data(root, sheet, rows):
     for rowx,rowname in enumerate(rows):
         if rowname == '':
             continue
-        rowxml = etree.SubElement(root, 'iati-element')
         if isinstance(rowname, tuple):
-            rowxml.attrib['name'] = rowname[0]
+            rowxml = etree.SubElement(root, rowname[0])
             rowxml.attrib['type'] = rowname[2]
         else:
-            rowxml.attrib['name'] = rowname
+            rowxml = etree.SubElement(root, rowname)
         
         for colx, heading in enumerate(structure.header):
             if heading == '':
@@ -234,42 +233,17 @@ def sheetschema(root, sheetname):
 
         """
     }
-    restriction_name = E.restriction(base="xs:string")
-    restriction_type = E.restriction(base="xs:string")
+    choice_el = E.choice(maxOccurs="unbounded")
     root.append(
         E.element(
             E.annotation(lang("en", E.documentation(ann[sheetname]))),
             E.complexType(
-                E.choice(
-                    E.element(
-                        E.complexType(
-                            E.complexContent(
-                                E.extension(
-                                    E.attribute(
-                                        E.simpleType(
-                                            restriction_name
-                                        ),
-                                        name="name",
-                                        use="required"
-                                    ),
-                                    E.attribute(
-                                        E.simpleType(
-                                            restriction_type
-                                        ),
-                                        name="type"
-                                    ),
-                                    base="informationArea"
-                                )
-                            ),
-                        ),
-                        name="iati-element"
-                    ),
-                    maxOccurs="unbounded",
-                )
+                choice_el
             ),
             name=sheetname
         )
     )
+    tuple_rows_done = {}
     for rowx,rowname in enumerate(rows):
         if isinstance(rowname, tuple):
             """all_el.append( E.element(
@@ -283,10 +257,32 @@ def sheetschema(root, sheetname):
                 name = rowname[2],
                 minOccurs="0"
             ) )"""
-            restriction_name.append(E.enumeration(value=rowname[0]))
+            if rowname[0] in tuple_rows_done:
+                restriction_type = tuple_rows_done[rowname[0]]
+            else:
+                restriction_type = E.restriction(base="xs:string")
+                tuple_rows_done[rowname[0]] = restriction_type
+                choice_el.append(
+                    E.element(
+                        E.complexType(
+                            E.complexContent(
+                                E.extension(
+                                    E.attribute(
+                                        E.simpleType(
+                                            restriction_type
+                                        ),
+                                        name="type"
+                                    ),
+                                    base="informationArea"
+                                )
+                            ),
+                        ),
+                        name=rowname[0]
+                    )
+                )
             restriction_type.append(E.enumeration(value=rowname[2]))
         elif rowname:
-            restriction_name.append(E.enumeration(value=rowname))
+            choice_el.append(E.element(name=rowname, type="informationArea"))
 
 def publishingschema(root):
     """ Produce the necessary schema elements for the publishing sheet. 
