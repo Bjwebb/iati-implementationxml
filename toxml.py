@@ -195,7 +195,7 @@ def full_xml(spreadsheet):
         parse_data(
             E.organisation(),
             book.sheet_by_index(2),
-            structure.organisation_rows 
+            structure.organisation_rows
         ),
         parse_data(
             E.activity(),
@@ -218,6 +218,7 @@ def sheetschema(root, sheetname):
     """
     global E
     rows = vars(structure)[sheetname+'_rows'] 
+    docs = vars(structure)[sheetname+'_docs']
     #tuple_rows_done = {}
     ann = {
         "activity": """
@@ -245,44 +246,43 @@ def sheetschema(root, sheetname):
     )
     tuple_rows_done = {}
     for rowx,rowname in enumerate(rows):
+        element = None
         if isinstance(rowname, tuple):
-            """all_el.append( E.element(
-                E.complexType(suball),
-                name = rowname[0],
-                minOccurs="0"
-            ) )
-            tuple_rows_done[rowname[0]] = suball 
-            suball.append( E.element(
-                type = "informationArea",
-                name = rowname[2],
-                minOccurs="0"
-            ) )"""
             if rowname[0] in tuple_rows_done:
                 restriction_type = tuple_rows_done[rowname[0]]
             else:
                 restriction_type = E.restriction(base="xs:string")
                 tuple_rows_done[rowname[0]] = restriction_type
-                choice_el.append(
-                    E.element(
-                        E.complexType(
-                            E.complexContent(
-                                E.extension(
-                                    E.attribute(
-                                        E.simpleType(
-                                            restriction_type
-                                        ),
-                                        name="type"
+                element = E.element(
+                    E.complexType(
+                        E.complexContent(
+                            E.extension(
+                                E.attribute(
+                                    E.annotation(lang("en",E.documentation(
+                                        """The type of information reported about this element,
+                                        see restriction for details."""
+                                    ))),
+                                    E.simpleType(
+                                        restriction_type
                                     ),
-                                    base="informationArea"
-                                )
-                            ),
+                                    name="type"
+                                ),
+                                base="informationArea"
+                            )
                         ),
-                        name=rowname[0]
-                    )
+                    ),
+                    name=rowname[0]
                 )
+                choice_el.append(element)
             restriction_type.append(E.enumeration(value=rowname[2]))
         elif rowname:
-            choice_el.append(E.element(name=rowname, type="informationArea"))
+            element = E.element(name=rowname, type="informationArea")
+            choice_el.append(element)
+        if element is not None and docs[rowx]:
+            element.insert(
+                0,
+                E.annotation(lang("en", E.documentation(docs[rowx])))
+            )
 
 def publishingschema(root):
     """ Produce the necessary schema elements for the publishing sheet. 

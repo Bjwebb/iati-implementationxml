@@ -2,6 +2,8 @@ header = ['','','', 'status', 'publication-date', 'exclusion', '', 'provider-def
 
 organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'document-link'] 
 
+organisation_docs = ['', '', '', '', '', '', '', 'Annual forward planning budget data for agency', 'Annual forward planning budget for funded institutions', 'Annual forward planning budget data for countries', 'Organisation documents']
+
 activity_rows = [
     '',
     '',
@@ -59,6 +61,8 @@ activity_rows = [
     ('conditions', 'info', 'text'),
     'result'
 ]
+
+activity_docs = ['', 'Activities', '', 'Note: definitions and code lists can be found at:', 'http://iatistandard.org/activities-standard', '', 'Information Area', 'Identification', 'Reporting Organisation', 'IATI activity identifier', 'Other activity identifiers', 'Basic Activity Information', 'Activity Title (Agency language)', 'Activity Title (Recipient language)', 'Activity Description (Agency language)', 'Activity Description (Recipient language)', 'Activity Status', 'Activity Dates (Start Date)', 'Activity Dates (End Date)', 'Activity Contacts', 'Participating Organisation (Funding)', 'Participating Organisation (Extending)', 'Participating Organisation (Implementing)', 'Participating Organisation (Accountable)', 'Geopolitical Information', 'Recipient Country', 'Recipient Region', 'Sub-national Geographic Location', 'Classifications', 'Sector (DAC CRS)', 'Sector (Agency specific)', 'Policy Markers', 'Collaboration Type', 'Default Flow Type', 'Default Finance Type', 'Default Aid Type', 'Default Tied Aid Status', 'Financial', 'Activity Budget', 'Planned Disbursements', '(UNDER DEVELOPMENT) Recipient Country Budget Identifier', 'Financial Transaction', 'Financial transaction (Commitment)', 'Financial transaction (Disbursement & Expenditure)', 'Financial transaction (Reimbursement)', 'Financial transaction (Incoming Funds)', 'Financial transaction (Loan repayment / interest repayment)', 'Related Documents', 'Activity Documents', 'Activity Website', 'Related Activity', 'Performance', 'Conditions attached Y/N', 'Text of Conditions', 'Results data']
 
 publishing_rows = [
     (),
