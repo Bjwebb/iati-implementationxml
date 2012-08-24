@@ -412,7 +412,12 @@ def full_schema():
                     E.element(ref="activity"),
                 ),
                 E.attribute(ref="xml:lang"),
-                E.attribute(name="generated-datetime", type="xs:dateTime")
+                E.attribute(
+                    E.annotation(lang("en", E.documentation("""
+                    The datetime that the xml file was generated.
+                    (NOT the date that the schedule was written)
+                    """))),
+                    name="generated-datetime", type="xs:dateTime")
             ),
             name="implementation"
         ),
@@ -423,9 +428,21 @@ def full_schema():
             """))),
             E.complexType(
                 E.choice(
-                    E.element(name="publisher", type="codeType"),
-                    E.element(name="version", type="textType"),
-                    E.element(name="date", type="xs:date"),
+                    E.element(
+                        E.annotation(lang("en", E.documentation("""
+                        The publisher that this is a schedule for.
+                        The code should be the IATI organisation identifier.
+                        
+                        """))),
+                        name="publisher", type="codeType"),
+                    E.element(
+                        name="version", type="textType"),
+                    E.element(
+                        E.annotation(lang("en", E.documentation("""
+                        The date when the implementation schedule was last updated.
+
+                        """))),
+                        name="date", type="xs:date"),
                     minOccurs="0", maxOccurs="unbounded"
                 ),
             ),
