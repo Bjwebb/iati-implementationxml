@@ -62,7 +62,9 @@ activity_rows = [
     'result'
 ]
 
-activity_docs = ['', 'Activities', '', 'Note: definitions and code lists can be found at:', 'http://iatistandard.org/activities-standard', '', 'Information Area', 'Identification', 'Reporting Organisation', 'IATI activity identifier', 'Other activity identifiers', 'Basic Activity Information', 'Activity Title (Agency language)', 'Activity Title (Recipient language)', 'Activity Description (Agency language)', 'Activity Description (Recipient language)', 'Activity Status', 'Activity Dates (Start Date)', 'Activity Dates (End Date)', 'Activity Contacts', 'Participating Organisation (Funding)', 'Participating Organisation (Extending)', 'Participating Organisation (Implementing)', 'Participating Organisation (Accountable)', 'Geopolitical Information', 'Recipient Country', 'Recipient Region', 'Sub-national Geographic Location', 'Classifications', 'Sector (DAC CRS)', 'Sector (Agency specific)', 'Policy Markers', 'Collaboration Type', 'Default Flow Type', 'Default Finance Type', 'Default Aid Type', 'Default Tied Aid Status', 'Financial', 'Activity Budget', 'Planned Disbursements', '(UNDER DEVELOPMENT) Recipient Country Budget Identifier', 'Financial Transaction', 'Financial transaction (Commitment)', 'Financial transaction (Disbursement & Expenditure)', 'Financial transaction (Reimbursement)', 'Financial transaction (Incoming Funds)', 'Financial transaction (Loan repayment / interest repayment)', 'Related Documents', 'Activity Documents', 'Activity Website', 'Related Activity', 'Performance', 'Conditions attached Y/N', 'Text of Conditions', 'Results data']
+activity_docs = [
+    '', 'Activities', '', 'Note: definitions and code lists can be found at:', 'http://iatistandard.org/activities-standard', '', 'Information Area', 'Identification', 'Reporting Organisation', 'IATI activity identifier', 'Other activity identifiers', 'Basic Activity Information', 'Activity Title (Agency language)', 'Activity Title (Recipient language)', 'Activity Description (Agency language)', 'Activity Description (Recipient language)', 'Activity Status', 'Activity Dates (Start Date)', 'Activity Dates (End Date)', 'Activity Contacts', 'Participating Organisation (Funding)', 'Participating Organisation (Extending)', 'Participating Organisation (Implementing)', 'Participating Organisation (Accountable)', 'Geopolitical Information', 'Recipient Country', 'Recipient Region', 'Sub-national Geographic Location', 'Classifications', 'Sector (DAC CRS)', 'Sector (Agency specific)', 'Policy Markers', 'Collaboration Type', 'Default Flow Type', 'Default Finance Type', 'Default Aid Type', 'Default Tied Aid Status', 'Financial', 'Activity Budget', 'Planned Disbursements', '(UNDER DEVELOPMENT) Recipient Country Budget Identifier', 'Financial Transaction', 'Financial transaction (Commitment)', 'Financial transaction (Disbursement & Expenditure)', 'Financial transaction (Reimbursement)', 'Financial transaction (Incoming Funds)', 'Financial transaction (Loan repayment / interest repayment)', 'Related Documents', 'Activity Documents', 'Activity Website', 'Related Activity', 'Performance', 'Conditions attached Y/N', 'Text of Conditions', 'Results data'
+]
 
 publishing_rows = [
     (),
@@ -117,6 +119,74 @@ publishing_rows = [
     (),
     (),
     ('', 'user-interface', 'status', '', 'narrative') #USERINT
+]
+
+publishing_docs = [
+    '',
+    '',
+    '1. When will data be published?',
+    '',
+    'Timetable and frequency of publication',
+    '',
+    ('Which organisations/agencies/programmes will your IATI data cover? (What % of your total development flows does this cover? What is missing?)',
+    'Percentage of total budget / ODA'),
+    '',
+    '',
+    ('Overall timetable for publication (Provide a date for when these organisations will publish (a) an initial (incomplete) set of IATI data and (b) full IATI implementation)',
+    'Date of initial implementation',
+    'Date of full implementation'),
+    '',
+    '',
+    ('Timeliness and frequency of publication (How soon after data is captured and available internally will data be published? How frequently will data be published?)',
+    'Frequency of publication',
+    'Timeliness of publication'),
+    '',
+    '',
+    ('How early in lifecycle will activity details be published? (Will activity details be published during the pipeline/identification stage or not until they are approved and in the implementation stage)',
+    'Lifecycle status at publication'),
+    '',
+    '',
+    ('Data quality status (Do you want to identify the status of the quality/audit/statistical verification of data that is published in registry? Please indicate whether you anticipate doing this, and the likely timing of moving from unverified data to verified data)',
+    'Data quality'),
+    '',
+    '',
+    ('Approach to publication (Please outline what staff and system resources are being made available to implement IATI,  any relevant organisational structures e.g. working groups, and who is leading on IATI implementation)',
+    'System resource'),
+    '',
+    'Other notes',
+    '',
+    '',
+    '2. What are the exclusions from publication?',
+    '',
+    '',
+    'Exceptions and constraints: general rules that exclude activities from being published. Any specific data item exclusions should be listed in the data tables (Organisation data tab and Activity data tab).',
+    'Thresholds (are there any thresholds on the value of activities or transactions to be published. Please specify what the general threshold limits are for publication)',
+    '',
+    'Exclusions (Please identify any rules for excluding data or information that will either be applied automatically or used as a basis to manually exclude publication. Note that exceptions for publication should be kept to a minimum and based on existing national or other regulations)',
+    '',
+    'Any general issues or other constraints',
+    '',
+    '',
+    '3. How will data be published? ',
+    '',
+    '',
+    '',
+    '',
+    ('Information for prospective users of information',
+    'Licensing (Under which license will data be published: public domain or attribution? If the license does not meet the IATI standard please specify why. Please state whether you intend to use the IATI authorised license or another)',
+    'Licence type'),
+    '',
+    '',
+    ('Definition of an activity and multi-level activities (How is an activity defined e.g. projects and programmes, or some other structure? Do you have multi-tiered project structures e.g. projects and sub-projects or components? At which level do you intend to publish details (e.g. transactions)?)',
+    'Multi-level activities reported?'),
+    '',
+    '',
+    ('Segmenting data for publication (The recommendation is to publish data segmented by country i.e. one data file for each country. Duplicate project data must not exist within different files, so projects targeting multiple countries or regional/worldwide by nature should be held within a non-country specific file(s). Is this a practical suggestion for your programme? How many projects are not specific to one country and what non-country files best suit your programme?)',
+    'Segmentation'),
+    '',
+    '',
+    ('Do you intend to provide a user interface in addition to raw IATI data? (Will IATI data be accessible for end users through an existing or a new user interface on your website? [Note: this is not an IATI requirement])',
+    'User interface?'),
 ]
 
 date_tags = [ 'publication-date', 'date-initial', 'date-full' ]

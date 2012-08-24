@@ -292,6 +292,7 @@ def publishingschema(root):
     """
     global E
     rows = structure.publishing_rows
+    docs = structure.publishing_docs
     all_el = E.all()
     root.append(
         E.element(
@@ -328,11 +329,27 @@ def publishingschema(root):
                             t = "xs:decimal"
                         else:
                             t = "xs:string"
-                        ext.append( E.attribute(
-                            name=row[i],
-                            type=t) )
+                        attribute = E.attribute(name=row[i],
+                            type=t)
+                        ext.append(attribute)
+                        try:
+                            attribute.insert(0,
+                                E.annotation(lang("en", E.documentation(docs[rowx][i-1])))
+                            )
+                        except IndexError:
+                            pass
+
+
             else:
                 el = E.element(name=row[1], type="narrativeParent")
+            if docs[rowx]:
+                if isinstance(docs[rowx], tuple):
+                    documentation = docs[rowx][0]
+                else:
+                    documentation = docs[rowx]
+                el.insert(0,
+                    E.annotation(lang("en", E.documentation(documentation)))
+                )
             all_el.append(el)
 
 def lang(code, el):
