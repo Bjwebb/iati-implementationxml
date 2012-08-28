@@ -1,9 +1,20 @@
+# This file contains the mapping between the Implementation Schedule
+# spreadsheets and the outputted XML files.
+
+# Map of each column of the activity and organisation tables
 header = ['','','', 'status', 'publication-date', 'exclusion', '', 'provider-definition', 'notes']
 
+
+# Map each row in the organisation table to a named XML element
 organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'document-link'] 
 
+# Documentation for each of these elements
 organisation_docs = ['', '', '', '', '', '', '', 'Annual forward planning budget data for agency', 'Annual forward planning budget for funded institutions', 'Annual forward planning budget data for countries', 'Organisation documents']
 
+
+# Map each row in the activity table to a named XML element
+# Either elementname, or (elementname, UNUSED, type)
+# Where type is the value that the type attribute will have
 activity_rows = [
     '',
     '',
@@ -62,10 +73,16 @@ activity_rows = [
     'result'
 ]
 
+# Documentation for each of the activity rows
 activity_docs = [
     '', 'Activities', '', 'Note: definitions and code lists can be found at:', 'http://iatistandard.org/activities-standard', '', 'Information Area', 'Identification', 'Reporting Organisation', 'IATI activity identifier', 'Other activity identifiers', 'Basic Activity Information', 'Activity Title (Agency language)', 'Activity Title (Recipient language)', 'Activity Description (Agency language)', 'Activity Description (Recipient language)', 'Activity Status', 'Activity Dates (Start Date)', 'Activity Dates (End Date)', 'Activity Contacts', 'Participating Organisation (Funding)', 'Participating Organisation (Extending)', 'Participating Organisation (Implementing)', 'Participating Organisation (Accountable)', 'Geopolitical Information', 'Recipient Country', 'Recipient Region', 'Sub-national Geographic Location', 'Classifications', 'Sector (DAC CRS)', 'Sector (Agency specific)', 'Policy Markers', 'Collaboration Type', 'Default Flow Type', 'Default Finance Type', 'Default Aid Type', 'Default Tied Aid Status', 'Financial', 'Activity Budget', 'Planned Disbursements', '(UNDER DEVELOPMENT) Recipient Country Budget Identifier', 'Financial Transaction', 'Financial transaction (Commitment)', 'Financial transaction (Disbursement & Expenditure)', 'Financial transaction (Reimbursement)', 'Financial transaction (Incoming Funds)', 'Financial transaction (Loan repayment / interest repayment)', 'Related Documents', 'Activity Documents', 'Activity Website', 'Related Activity', 'Performance', 'Conditions attached Y/N', 'Text of Conditions', 'Results data'
 ]
 
+
+# Map each row in the publishing table to an element
+# And each cell to an attribute or narrative element
+# () for unparsed rows, organisations
+# ('', 'element for row', 'attribute/narrative', 'attribute/narrative', 'attribute/narrative')
 publishing_rows = [
     (),
     (),
@@ -121,6 +138,8 @@ publishing_rows = [
     ('', 'user-interface', 'status', '', 'narrative') #USERINT
 ]
 
+# Documentation for each of the publishing rows
+# Note that these tuples are misaligned by 1 value from those above
 publishing_docs = [
     '',
     '',
@@ -189,9 +208,14 @@ publishing_docs = [
     'User interface?'),
 ]
 
+
+# List of XML elements that will contain a date
 date_tags = [ 'publication-date', 'date-initial', 'date-full' ]
+# List of XML elements that will contain a decimal value
 decimal_tags = [ 'value' ]
 
+
+# Codes for xml elements named in `header` above
 codes_activity = {
     # Status
     'status': {    'Fully compliant': 'fc',
@@ -206,6 +230,11 @@ codes_activity = {
                       'd) Other': 'd'}
 }
 
+# Codes for xml elements corresponding to an element from the publishing
+# table.
+# These were extracted from a hidden row in the excel spreadsheet
+# Those named UNUSED and UNUSED2 were found here, but not used in any of
+# the main tables.
 codes = {   
     # Data quality
     'quality': {   'Unverified': 'u', 'Verified': 'v'},

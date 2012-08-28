@@ -18,6 +18,8 @@ import lxml.etree as etree
 import datetime
 import parsedatetime.parsedatetime as pdt
 
+# structure.py contains the mappings between the spreadsheet and the XML files 
+# and also all the information required to generate the schema
 import structure
 
 datemode = None
@@ -147,7 +149,10 @@ def parse_information(root, sheet, rows):
 
 def silent_value(sheet, **args):
     """ Helper function to fetch cell values and convert them to strings,
-        whilst ignoring possible exceptions.
+        whilst ignoring possible exceptions (ie. if a cell does not exist).
+
+        Also make sure all values are returned as unicode, and that integers
+        are formatted correctly. 
 
     """
     try:

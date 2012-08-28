@@ -1,7 +1,3 @@
-#python toxml.py > test.xml 
-#python toxml.py test > test.xsd
-#xmllint --schema test.xsd test.xml  --noout
-
 for f in schedules/*.xls; do
     echo "Processing $f"
     python toxml.py "$f" > xml/tmp.xml;
