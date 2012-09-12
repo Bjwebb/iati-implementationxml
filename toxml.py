@@ -221,8 +221,10 @@ def documentation_from_dict(codes):
     table = HE.table()
     table.append( HE.tr( HE.th('Text'), HE.th('Code') ) )
     for text, code in sorted(codes.items()):
-        table.append( HE.tr( HE.td(text), HE.td(code) ) )
-    return HE.div('The value of this attribute should be one of the codes listed below:', table)
+        row = HE.tr( HE.td(text), HE.td(code) )
+        row.tail = '\n'
+        table.append( row )
+    return HE.div('The value of this attribute should be one of the codes listed below:\n', table)
 
 def sheetschema(root, sheetname):
     """ Produce the schema elements for the named sheet.
