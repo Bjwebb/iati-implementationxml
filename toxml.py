@@ -211,6 +211,18 @@ def full_xml(spreadsheet):
     root.set('generated-datetime', datetimestamp())
     return root
 
+def documentation_from_dict(codes):
+    """ Produces a documentation table from a dict that maps codes. """
+    # Create an ElementMaker for creating html tags
+    HE = ElementMaker(namespace="http://www.w3.org/1999/xhtml",
+                     nsmap={'xs':"http://www.w3.org/2001/XMLSchema",
+                            'xml':"http://www.w3.org/XML/1998/namespace",
+                            'xhtml':"http://www.w3.org/1999/xhtml"})
+    table = HE.table()
+    table.append( HE.tr( HE.th('Text'), HE.th('Code') ) )
+    for text, code in sorted(codes.items()):
+        table.append( HE.tr( HE.td(text), HE.td(code) ) )
+    return HE.div('The value of this attribute should be one of the codes listed below:', table)
 
 def sheetschema(root, sheetname):
     """ Produce the schema elements for the named sheet.
@@ -306,8 +318,7 @@ def publishingschema(root):
             published, including any general exceptions.
 
             All child elements may only contain text, but may also have
-            attributes. These may contain short codes - the list these
-            codes can be found at http://iati.bjwebb.co.uk/codes.txt
+            attributes.
 
             """))),
             E.complexType(all_el),
@@ -338,8 +349,15 @@ def publishingschema(root):
                             type=t)
                         ext.append(attribute)
                         try:
+                            try:
+                                dfd = documentation_from_dict(structure.codes[row[i]])
+                            except KeyError:
+                                dfd = ''
                             attribute.insert(0,
-                                E.annotation(lang("en", E.documentation(docs[rowx][i-1])))
+                                E.annotation(lang("en", E.documentation(
+                                    docs[rowx][i-1],
+                                    dfd
+                                )))
                             )
                         except IndexError:
                             pass
@@ -371,7 +389,8 @@ def full_schema():
     global E
     E = ElementMaker(namespace="http://www.w3.org/2001/XMLSchema",
                      nsmap={'xs':"http://www.w3.org/2001/XMLSchema",
-                            'xml':"http://www.w3.org/XML/1998/namespace"})
+                            'xml':"http://www.w3.org/XML/1998/namespace",
+                            'xhtml':"http://www.w3.org/1999/xhtml"})
     headerchoice = E.choice(maxOccurs="unbounded", minOccurs="0")
     root = E.schema(
         # Different syntax to avoid clash with python's import statement
@@ -392,10 +411,6 @@ def full_schema():
             spreadsheets. Describes the implementation of a specific
             field, or type of information by the data provider.
 
-            Status and exclusion have attributes, containing coded values
-            - a list of these codes can be found at
-            http://iati.bjwebb.co.uk/codes_activity.txt
-
             """))),
             headerchoice,
             name = "informationArea"
@@ -405,9 +420,6 @@ def full_schema():
             Top level element containg elements for each of the top level
             types of information found in the implementation schedule.
 
-            The xml:lang attribute can be used to specify a default
-            language for text in the document.
-
             """))),
             E.complexType(
                 E.all(
@@ -416,11 +428,17 @@ def full_schema():
                     E.element(ref="organisation"),
                     E.element(ref="activity"),
                 ),
-                E.attribute(ref="xml:lang"),
+                E.attribute(
+                    E.annotation(lang("en", E.documentation("""
+                    ISO 2 letter code specifying the default language for text in this implementation schedule.
+
+                    """))),
+                    ref="xml:lang"),
                 E.attribute(
                     E.annotation(lang("en", E.documentation("""
                     The datetime that the xml file was generated.
                     (NOT the date that the schedule was written)
+
                     """))),
                     name="generated-datetime", type="xs:dateTime")
             ),
@@ -512,20 +530,28 @@ def full_schema():
             name="textType"
         )
     )
-    for heading in structure.header:
+    for i, heading in enumerate(structure.header):
         if heading == '': continue
         if heading in structure.codes_activity: 
             complexType = E.complexType( 
-                E.attribute(name="category", type="xs:string")
+                E.attribute(
+                    E.annotation(lang("en", E.documentation(
+                        documentation_from_dict(structure.codes_activity[heading])
+                    ))),
+                    name="category",
+                    type="xs:string"
+                )
             )
             if heading == 'exclusions':
-                complexType.append( E.choice(
-                    E.element(name="narrative",
-                              type="textType"),
+                complexType.insert(0, E.choice(
+                    E.element(
+                        name="narrative",
+                        type="textType"),
                     maxOccurs="unbounded"
-                ) )
+                ) ) 
             headerchoice.append(
                 E.element( 
+                    E.annotation(lang("en", E.documentation(structure.header_docs[i]))),
                     complexType,
                     name=heading
                 ),
@@ -535,8 +561,11 @@ def full_schema():
                 t = "xs:date"
             else:
                 t = "textType"
-            headerchoice.append(E.element(name=heading, type=t,
-                                                minOccurs="0"))
+            headerchoice.append(E.element(
+                E.annotation(lang("en", E.documentation(structure.header_docs[i]))),
+                name=heading,
+                type=t,
+                minOccurs="0"))
     sheetschema(root, 'organisation')
     sheetschema(root, 'activity')
     publishingschema(root)

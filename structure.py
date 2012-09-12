@@ -2,8 +2,9 @@
 # spreadsheets and the outputted XML files.
 
 # Map of each column of the activity and organisation tables
-header = ['','','', 'status', 'publication-date', 'exclusion', '', 'provider-definition', 'notes']
+header = ['','','', 'status', 'publication-date', 'exclusions', '', 'provider-definition', 'notes']
 
+header_docs = ['', '', '', 'Status', 'Publication Date', 'Exclusion', '', 'Provider Definition', 'Notes']
 
 # Map each row in the organisation table to a named XML element
 organisation_rows = ['','','','','','','', 'total-budget', 'recipient-org-budget', 'recipient-country-budget', 'document-link'] 
@@ -216,18 +217,21 @@ decimal_tags = [ 'value' ]
 
 
 # Codes for xml elements named in `header` above
+#   ('activity' here is actually misleading, as it is used for both
+#   activity and organisation elements)
 codes_activity = {
     # Status
     'status': {    'Fully compliant': 'fc',
                    'Future publication': 'fp',
                    'Partially compliant': 'pc',
                    'Unable to publish': 'up',
-                   'Under consideration': 'uc'},
+                   'Under consideration': 'uc' },
     # Exclusions
-    'exclusions': {    'a) Not applicable to organisation': 'a',
-                      'b) A non-disclosure policy': 'b',
-                      'c) Not currently captured and prohibitive cost': 'c',
-                      'd) Other': 'd'}
+    'exclusions': { 'a) Not applicable to organisation': 'a',
+                    'b) A non-disclosure policy': 'b',
+                    'c) Not currently captured and prohibitive cost': 'c',
+                    'd) Other': 'd', 
+                    'n/a (No exclusions)': '' }
 }
 
 # Codes for xml elements corresponding to an element from the publishing
