@@ -100,7 +100,7 @@ publishing_rows = [
     ('', 'publication-frequency', 'frequency', 'timeliness', 'narrative'), #TIMEFREQ
     (),
     (),
-    ('', 'publication-lifecyle', 'point', '', 'narrative'), #LIFECYCLE
+    ('', 'publication-lifecycle', 'point', '', 'narrative'), #LIFECYCLE
     (),
     (),
     ('', 'data-quality', 'quality', '', 'narrative'), #DATAQUAL
